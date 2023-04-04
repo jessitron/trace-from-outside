@@ -31,16 +31,7 @@ function main() {
   );
   const tracer = otel.trace.getTracer("inside-node-program");
 
-  const realSpan = tracer.startSpan("ppo", {}, newContext);
-  const newContext2 = otel.trace.setSpanContext(
-    otel.context.active(),
-    realSpan.spanContext()
-  );
-  realSpan.end();
-
   otel.context.with(newContext, () => {
-    console.log("active context: " + JSON.stringify(otel.context.active()));
-
     const s = tracer.startSpan("bananas", {});
 
     console.log("span in trace " + s.spanContext().traceId);
