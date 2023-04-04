@@ -17,7 +17,7 @@ function main() {
   const externalSpanContext: otel.SpanContext = {
     traceId: "39aec76ccd07ff96c2335c6d2b7c0048",
     spanId: "b01dfd393fb17ee9",
-    isRemote: false,
+    isRemote: true,
     traceFlags: 1, // this says that it is sampled: we do want to emit this trace
   };
   console.log(
