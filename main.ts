@@ -17,7 +17,7 @@ function main() {
   const externalSpanContext: otel.SpanContext = {
     traceId: "39aec76ccd07ff96c2335c6d2b7c0048",
     spanId: "b01dfd393fb17ee9",
-    isRemote: true,
+    isRemote: false,
     traceFlags: 1, // this says that it is sampled: we do want to emit this trace
   };
   console.log(
@@ -38,7 +38,7 @@ function main() {
   );
   realSpan.end();
 
-  otel.context.with(newContext2, () => {
+  otel.context.with(newContext, () => {
     console.log("active context: " + JSON.stringify(otel.context.active()));
 
     const s = tracer.startSpan("bananas", {});

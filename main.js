@@ -36,7 +36,7 @@ function main() {
     const externalSpanContext = {
         traceId: "39aec76ccd07ff96c2335c6d2b7c0048",
         spanId: "b01dfd393fb17ee9",
-        isRemote: true,
+        isRemote: false,
         traceFlags: 1, // this says that it is sampled: we do want to emit this trace
     };
     console.log("Is it a valid span context? " +
