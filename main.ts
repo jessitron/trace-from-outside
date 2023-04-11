@@ -1,10 +1,14 @@
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import * as otel from "@opentelemetry/api";
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 
 const { ConsoleSpanExporter } = require("@opentelemetry/sdk-trace-base");
 
+
+
 const sdk = new NodeSDK({
-  traceExporter: new ConsoleSpanExporter(),
+  traceExporter: new OTLPTraceExporter(),
+  // serviceName: "jaswanthm-restful-booker-platform"
 });
 
 sdk.start();
@@ -14,9 +18,16 @@ main();
 sdk.shutdown();
 
 function main() {
+
+  let traceId:string = process.env.TRACE_ID as string;
+  console.log("ENV Trace = " + traceId)
+
+  let spanId:string = process.env.SPAN_ID as string;
+  console.log("ENV Span = " + spanId)
+
   const externalSpanContext: otel.SpanContext = {
-    traceId: "39aec76ccd07ff96c2335c6d2b7c0048",
-    spanId: "b01dfd393fb17ee9",
+    traceId: traceId,
+    spanId: spanId,
     isRemote: true,
     traceFlags: 1, // this says that it is sampled: we do want to emit this trace
   };
@@ -29,7 +40,7 @@ function main() {
     otel.context.active(),
     externalSpanContext
   );
-  const tracer = otel.trace.getTracer("inside-node-program");
+  const tracer = otel.trace.getTracer("jaswanthm-restful-booker-platform");
 
   otel.context.with(newContext, () => {
     const s = tracer.startSpan("bananas", {});
