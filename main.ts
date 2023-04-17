@@ -2,14 +2,6 @@ import { NodeSDK } from "@opentelemetry/sdk-node";
 import * as otel from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 import { Metadata } from "@grpc/grpc-js";
-const { ConsoleSpanExporter } = require("@opentelemetry/sdk-trace-base");
-
-import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
-
-// For troubleshooting, set the log level to DiagLogLevel.DEBUG
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
-
-console.log("What is the traceparent env var? " + process.env["TRACEPARENT"]);
 
 const metadata = new Metadata();
 metadata.set(
@@ -31,27 +23,31 @@ main();
 sdk.shutdown();
 
 function main() {
-  let traceId: string = process.env.TRACE_ID as string;
-  console.log("ENV Trace = " + traceId);
+  var newContext = otel.context.active();
+  const traceparent = process.env["TRACEPARENT"]; // 00-fb80103a8b2c50e61f4abf8d3dc0ada6-f645d8ef0efe1de1-01
+  console.log("Traceparent: " + traceparent);
+  if (traceparent) {
+    const [_1, traceId, spanId, _4] = traceparent?.split("-");
+    console.log("ENV Trace = " + traceId);
+    console.log("ENV Span = " + spanId);
 
-  let spanId: string = process.env.SPAN_ID as string;
-  console.log("ENV Span = " + spanId);
+    const externalSpanContext: otel.SpanContext = {
+      traceId: traceId,
+      spanId: spanId,
+      isRemote: true,
+      traceFlags: 1, // this says that it is sampled: we do want to emit this trace
+    };
+    console.log(
+      "Is it a valid span context? " +
+        otel.trace.isSpanContextValid(externalSpanContext)
+    );
 
-  const externalSpanContext: otel.SpanContext = {
-    traceId: traceId,
-    spanId: spanId,
-    isRemote: true,
-    traceFlags: 1, // this says that it is sampled: we do want to emit this trace
-  };
-  console.log(
-    "Is it a valid span context? " +
-      otel.trace.isSpanContextValid(externalSpanContext)
-  );
+    newContext = otel.trace.setSpanContext(
+      otel.context.active(),
+      externalSpanContext
+    );
+  }
 
-  const newContext = otel.trace.setSpanContext(
-    otel.context.active(),
-    externalSpanContext
-  );
   const tracer = otel.trace.getTracer("jaswanthm-restful-booker-platform");
 
   otel.context.with(newContext, () => {
